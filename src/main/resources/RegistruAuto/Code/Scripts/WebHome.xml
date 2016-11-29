@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xwikidoc version="1.2" reference="RegistruAuto.Code.Scripts.WebHome" locale="">
+  <web>RegistruAuto.Code.Scripts</web>
+  <name>WebHome</name>
+  <language/>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>0</translation>
+  <creator>XWiki.alex</creator>
+  <creationDate>1474313095000</creationDate>
+  <author>XWiki.alex</author>
+  <contentAuthor>XWiki.alex</contentAuthor>
+  <date>1476950849000</date>
+  <contentUpdateDate>1476950849000</contentUpdateDate>
+  <version>1.90</version>
+  <title/>
+  <comment/>
+  <minorEdit>true</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}&#xd;
+#set ($fields = ['Asigurare', 'ITP', 'CopieConforma', 'Rovinieta', 'Tahograf'])&#xd;
+## Update dataExpirare${field}&#xd;
+#macro (updateDataExpirare)&#xd;
+  #set ($autoClass = 'RegistruAuto.Auto.Code.AutoClass')&#xd;
+  #set ($query = "from doc.object($autoClass) as auto")&#xd;
+  #set ($results = $services.query.xwql($query).execute())&#xd;
+  #foreach ($result in $results)&#xd;
+    #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+    #set ($resultObj = $resultDoc.getObject($autoClass))&#xd;
+    #set ($autoId = $resultObj.getValue('autoId'))&#xd;
+    #foreach ($field in $fields)&#xd;
+      #set ($sectionClass = "RegistruAuto.${field}.Code.${field}Class")&#xd;
+      #set ($sectionQuery = "from doc.object($sectionClass) as section where section.autoId=:autoId order by section.dataExpirare desc")&#xd;
+      #set ($sectionResults = $services.query.xwql($sectionQuery).bindValue('autoId', $autoId).setLimit(1).execute())&#xd;
+      #if ($sectionResults.size() > 0)&#xd;
+        #set ($sectionDoc = $xwiki.getDocument($sectionResults[0]))&#xd;
+        #set ($sectionObj = $sectionDoc.getObject($sectionClass))&#xd;
+        #if ($sectionObj.getValue('dataExpirare') != $resultObj.getValue("dataExpirare${field}"))&#xd;
+          $resultDoc.plainTitle : dataExpirare${field} : $sectionObj.getValue('dataExpirare')&#xd;
+          #set ($discad = $resultObj.set("dataExpirare${field}", $sectionObj.getValue('dataExpirare')))&#xd;
+        #end&#xd;
+      #end&#xd;
+    #end&#xd;
+    #set ($discard = $resultDoc.save())&#xd;
+  #end&#xd;
+#end&#xd;
+&#xd;
+#macro (renameAsTerminal)&#xd;
+  #foreach ($field in $fields)&#xd;
+    #set ($sectionClass = "RegistruAuto.${field}.Code.${field}Class")&#xd;
+    #set ($sectionTemplate = "RegistruAuto.${field}.Code.${field}Template")&#xd;
+    #set ($sectionQuery = "from doc.object($sectionClass) as section where doc.fullName&lt;&gt;'${sectionTemplate}'")&#xd;
+    #set ($results = $services.query.xwql($sectionQuery).execute())&#xd;
+    #foreach ($result in $results)&#xd;
+      #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+      #if ($resultDoc.name == 'WebHome')&#xd;
+        #set ($newDoc = $xwiki.getDocument($resultDoc.space))&#xd;
+        * Renamed [$services.model.serialize($resultDoc.documentReference)] to [$services.model.serialize($newDoc.documentReference)]&#xd;
+        #set($discard = $resultDoc.rename($newDoc.documentReference))&#xd;
+      #end&#xd;
+    #end&#xd;
+  #end&#xd;
+#end&#xd;
+&#xd;
+#macro (markAsHidden)&#xd;
+  ## Mark Auto as hidden&#xd;
+  ## #set ($query = "from doc.object(RegistruAuto.Auto.Code.AutoClass) as field where doc.name &lt;&gt; 'AutoTemplate' order by doc.fullName asc")&#xd;
+  ## #set ($results = $services.query.xwql($query).execute())&#xd;
+  ## #foreach ($result in $results)&#xd;
+  ##   #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+  ##   #set ($discard = $resultDoc.setHidden(0))&#xd;
+  ##   #set ($discard = $resultDoc.save())&#xd;
+  ## #end&#xd;
+&#xd;
+## Mark Registru as hidden&#xd;
+  #set ($query = "where doc.fullName like 'RegistruAuto%'")&#xd;
+  #set ($results = $services.query.xwql($query).execute())&#xd;
+  #foreach ($result in $results)&#xd;
+    #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+    #if (!$resultDoc.isHidden())&#xd;
+      #set ($discard = $resultDoc.setHidden(1))&#xd;
+      #set ($discard = $resultDoc.save())&#xd;
+    #end&#xd;
+  #end&#xd;
+&#xd;
+  ## Mark policies as hidden&#xd;
+  ## #foreach ($field in $fields)&#xd;
+  ##   #set ($sectionClass = "RegistruAuto.${field}.Code.${field}Class")&#xd;
+  ##   #set ($sectionQuery = "from doc.object($sectionClass) as section")&#xd;
+  ##   #set ($results = $services.query.xwql($sectionQuery).execute())&#xd;
+  ##   #foreach ($result in $results)&#xd;
+  ##     #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+  ##     #set ($discard = $resultDoc.setHidden(1))&#xd;
+  ##     #set ($discard = $resultDoc.save())&#xd;
+  ##   #end&#xd;
+  ## #end&#xd;
+#end&#xd;
+&#xd;
+#set ($scriptAction = $request.scriptAction)&#xd;
+#if ($scriptAction == 'updateDataExpirare')&#xd;
+  #updateDataExpirare()&#xd;
+#elseif ($scriptAction == 'renameAsTerminal')&#xd;
+  #renameAsTerminal()&#xd;
+#elseif ($scriptAction == 'markAsHidden')&#xd;
+  #markAsHidden()&#xd;
+#end&#xd;
+{{html clean="false"}}&#xd;
+  &lt;a class="btn btn-primary" href="$doc.getURL()?scriptAction=updateDataExpirare">Update dataExpirare polite&lt;/a>&#xd;
+  &lt;a class="btn btn-primary" href="$doc.getURL()?scriptAction=renameAsTerminal">Rename as Terminal&lt;/a>&#xd;
+  &lt;a class="btn btn-primary" href="$doc.getURL()?scriptAction=markAsHidden">Mark as hidden&lt;/a>&#xd;
+{{/html}}&#xd;
+&#xd;
+## Mark documents as hidden&#xd;
+&#xd;
+## Mark auto as hidden&#xd;
+## #set ($query = "from doc.object(RegistruAuto.Auto.Code.AutoClass) as field where doc.name &lt;&gt; 'AutoTemplate' order by doc.fullName asc")&#xd;
+## #set ($results = $services.query.xwql($query).execute())&#xd;
+## #foreach ($result in $results)&#xd;
+##   #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+##   #set ($discard = $resultDoc.setHidden(0))&#xd;
+##   #set ($discard = $resultDoc.save())&#xd;
+## #end&#xd;
+&#xd;
+## #set ($query = "where doc.fullName like 'RegistruAuto%'")&#xd;
+## #set ($results = $services.query.xwql($query).addFilter('hidden').execute())&#xd;
+## #foreach ($result in $results)&#xd;
+##   #set ($resultDoc = $xwiki.getDocument($result))&#xd;
+##   #set ($discard = $resultDoc.setHidden(1))&#xd;
+##   #set ($discard = $resultDoc.save())&#xd;
+## #end&#xd;
+{{/velocity}}</content>
+</xwikidoc>
