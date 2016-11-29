@@ -23,23 +23,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.contrib</groupId>
-    <artifactId>parent-platform</artifactId>
-    <version>8.4</version>
+    <groupId>com.drapo.autoregistry</groupId>
+    <artifactId>application-autoregistry</artifactId>
+    <version>1.0-SNAPSHOT</version>
   </parent>
-  <groupId>com.drapo.autoregistry</groupId>
-  <artifactId>application-autoregistry</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>Auto Registry</name>
+  <artifactId>application-autoregistry-ui</artifactId>
+  <packaging>xar</packaging>
+  <name>Auto Registry - UI</name>
   <description></description>
-  <modules>
-    <module>application-autoregistry-ui</module>
-  </modules>
-  <scm>
-    <connection>scm:git:https://github.com/dr4po/application-autoregistry.git</connection>
-    <developerConnection>scm:git:https://github.com/dr4po/application-autoregistry.git</developerConnection>
-    <url>https://github.com/dr4po/application-autoregistry/</url>
-    <tag>HEAD</tag>
-  </scm>
+  <properties>
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>Auto Registry</xwiki.extension.name>
+  </properties>
 </project>
