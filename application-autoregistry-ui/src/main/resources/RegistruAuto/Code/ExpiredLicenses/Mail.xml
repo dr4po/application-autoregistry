@@ -44,6 +44,7 @@
 #set ($nuExpiraNimic = true)
 #set ($startDate = $xwiki.jodatime.getDateTime().withTimeAtStartOfDay())
 #set ($endDate = $startDate.plusDays(7))
+#set ($subject = "Expirare Polite Auto saptamana ${startDate.weekOfWeekyear}: ${datetool.format('dd/MM/yyyy', $startDate.toDate())} - ${datetool.format('dd/MM/yyyy', $endDate.toDate())}")
 #set ($sectionsResults = {})
 #foreach ($section in $sections.entrySet())
   #set ($sectionClassName = "RegistruAuto.${section.value}.Code.${section.value}Class")
@@ -55,17 +56,15 @@
   #end
 #end
 #if (!$nuExpiraNimic)
-  #set ($discard = $xcontext.put('sectionsResults', $sectionsResults))
   #set ($mailFrom = '"Notifications" &lt;notifications@caemi.ro&gt;')
   #set ($mailTo = 'andrei.d.camelia@gmail.com')
   #set ($mailCC = 'nicolae.cotiuga@gmail.com')
   #set ($templateReference = $services.model.createDocumentReference('', ['RegistruAuto', 'Code', 'ExpiredLicenses'], 'Mail'))
-  #set ($mailParameters = {'from' : $mailFrom, 'to' : $mailCC})
+  #set ($mailParameters = {'from' : $mailFrom, 'to' : $mailCC, 'velocityVariables' : {'sectionsResults' : $sectionsResults, 'subject' : $subject}})
   #set ($message = $services.mailsender.createMessage('template', $templateReference, $mailParameters))
   #set ($mailResult = $services.mailsender.send($message))
 #end
-{{/velocity}}
-</content>
+{{/velocity}}</content>
   <object>
     <name>RegistruAuto.Code.ExpiredLicenses.Mail</name>
     <number>0</number>
@@ -124,7 +123,7 @@
       </text>
     </class>
     <property>
-      <html>#foreach ($sectionResult in $xcontext.sectionsResults.entrySet())
+      <html>#foreach ($sectionResult in $sectionsResults.entrySet())
   &lt;h4&gt;$sectionResult.key&lt;/h4&gt;
   #foreach ($result in $sectionResult.value)
     #set ($sectionDoc = $xwiki.getDocument($result))
@@ -138,7 +137,7 @@
       <language/>
     </property>
     <property>
-      <subject>Expirare Polite Auto</subject>
+      <subject>$subject</subject>
     </property>
     <property>
       <text> </text>
