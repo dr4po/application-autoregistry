@@ -57,12 +57,13 @@
 #end
 #if (!$nuExpiraNimic)
   #set ($mailFrom = '"Notifications" &lt;notifications@caemi.ro&gt;')
-  #set ($mailTo = 'andrei.d.camelia@gmail.com')
-  #set ($mailCC = 'nicolae.cotiuga@gmail.com')
+  #set ($templateParameters = {'from' : $mailFrom, 'velocityVariables' : {'sectionsResults' : $sectionsResults, 'subject' : $subject}})
   #set ($templateReference = $services.model.createDocumentReference('', ['RegistruAuto', 'Code', 'ExpiredLicenses'], 'Mail'))
-  #set ($mailParameters = {'from' : $mailFrom, 'to' : $mailCC, 'velocityVariables' : {'sectionsResults' : $sectionsResults, 'subject' : $subject}})
-  #set ($message = $services.mailsender.createMessage('template', $templateReference, $mailParameters))
-  #set ($mailResult = $services.mailsender.send($message))
+  #set ($parameters = {'hint' : 'template', 'parameters' : $templateParameters, 'source' : $templateReference})
+  #set ($groupReference = $services.model.createDocumentReference('', 'XWiki', 'XWikiAdminGroup'))
+  #set ($source = {'groups' : [$groupReference]})
+  #set ($messages = $services.mailsender.createMessages('usersandgroups', $source, $parameters))
+  #set ($mailResult = $services.mailsender.send($messages))
 #end
 {{/velocity}}</content>
   <object>
